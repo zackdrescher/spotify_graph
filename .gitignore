@@ -1,0 +1,6 @@
+# python
+__pycache__/
+
+# personal
+secrets.txt
+env

@@ -38,7 +38,10 @@ class Ingestor():
 
     def ingest_related_artist(self, artist_id, limit = NUM_REL_ARTISTS,
             _depth = 0):
-        """Recursively ingest artist related to a specific artist."""
+        """Recursively ingest artist related to a specific artist.
+            Artist must already be in DB."""
+
+        # TODO: check if artist DNE and insert if so
 
         self.connector.update_artist(artist_id, 'ingested', 'true')
 
@@ -80,7 +83,7 @@ class Ingestor():
         # This is a list of playlists
 
         p = spotipy.category_playlists(category_id)['playlists']['items']
-        
+
         # TODO: insert_playlist
         pass
 

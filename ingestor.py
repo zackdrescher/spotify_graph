@@ -87,6 +87,13 @@ class Ingestor():
         # TODO: insert_playlist
         pass
 
+    def clear_database(self):
+        """Clears the database this ingerstor is connected to."""
+
+        # TODO: add warning
+
+        self.connector.clear_database()
+
 if __name__  == '__main__':
 
     ing = Ingestor()

@@ -55,7 +55,7 @@ class Ingestor():
             self.connector.insert_related_relation(artist_id, a['id'])
 
             if _depth > 0:
-                self.ingest_related_artist(a['id'], depth - 1)
+                self.ingest_related_artist(a['id'], _depth - 1)
 
     def ingest_by_name(self, name):
         """Ingests the first artist from the search of on artist by name into

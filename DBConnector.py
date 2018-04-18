@@ -30,7 +30,8 @@ class DBConnector(object):
             return [record['n'] for record in session.run(
                 "MATCH (n:Artist { id : '%s' }) "
                 "SET n.%s = %s "
-                "RETURN n" % (artist_id), prop, val))]
+                "RETURN n" % (artist_id, prop, val)
+                )]
 
     # insert Nodes
     ############################################################################

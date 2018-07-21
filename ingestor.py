@@ -1,6 +1,7 @@
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
 from DBConnector import DBConnector
+from tqdm import tqdm
 
 CLIENT_ID = '42f875ddda804fdbbf596da0e0c112d9'
 CLIENT_SECRET = '9df4f102a4a94ababae489826b2f4bcf'
@@ -27,6 +28,11 @@ class Ingestor():
         self.spotipy = Spotify(auth = self.client_creds.get_access_token())
 
         self.connector = DBConnector()
+
+    def ingest(self):
+
+        self.ingest_categories()
+
 
     def get_artist_by_name(self, name):
         """Retrives a list of artist obecjts based on searching for the artist
@@ -73,9 +79,10 @@ class Ingestor():
     def ingest_categories(self):
         """Ingest categories from spotifies list of categories"""
 
+        print("Pull categories from API" )
         categories = self.spotipy.categories()['categories']['items']
 
-        for c in categories:
+        for c in tqdm(categories, desc = 'Inserting categories'):
             self.connector.insert_category(c)
             # TODO: ingest Category playlist
 

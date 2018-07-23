@@ -1,6 +1,12 @@
+# Spotipy
 from spotipy import Spotify
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyClientCredentials  
+from spotipy.client import SpotifyException
+
+# Local
 from DBConnector import DBConnector
+
+# Third party
 from tqdm import tqdm
 
 CLIENT_ID = '42f875ddda804fdbbf596da0e0c112d9'
@@ -83,16 +89,26 @@ class Ingestor():
         categories = self.spotipy.categories()['categories']['items']
 
         for c in tqdm(categories, desc = 'Inserting categories'):
+            
             self.connector.insert_category(c)
-            # TODO: ingest Category playlist
+            self.ingest_category_playlist(c['id'])
 
-    def ingest_category_playlists(self, category_id):
+    def ingest_category_playlist(self, category_id):
         # This is a list of playlists
 
-        p = spotipy.category_playlists(category_id)['playlists']['items']
+        try:
+            play_lists = self.spotipy.category_playlists(category_id)['playlists']['items']
+        except SpotifyException as e:
+            print('Category %s play list ingestion failed' % category_id)
+        else:
+            for p in tqdm(play_lists, desc = 'Insertiing Category playlists'):
 
-        # TODO: insert_playlist
-        pass
+                self.connector.insert_playlist(p)
+                # TODO: insert playlist category relation
+                # category id and p['id']
+                
+                # TODO: ingest tracks
+                # p['tracks']
 
     def clear_database(self):
         """Clears the database this ingerstor is connected to."""

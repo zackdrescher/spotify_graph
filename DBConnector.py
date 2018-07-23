@@ -79,10 +79,26 @@ class DBConnector(object):
                     parameters={'dict_param': d}
                     )
             except CypherError:
-                print(d['name'] +' already stored')
+                print(d['name'] +' already stored') 
 
     def insert_playlist(self, res):
         # parse_parse playlist
+
+        with self.driver.session() as session:
+            # create feilds
+            res['num_tracks'] = res['tracks']['total']
+            # Select feilds
+            feilds = ['collaborative', 'href', 'id', 'name', 'type', 'num_tracks']
+            d3 = {k : v for k,v in res.items() if k in feilds}
+            try:
+
+                result = session.run(
+                    statement="CREATE (a:Playlist) SET a = {dict_param}",
+                    parameters={'dict_param': d3}
+                    )
+            except CypherError:
+                print('Playlist %s already stored' % res['name'])
+
         pass
 
     # Insert Relations

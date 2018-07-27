@@ -43,11 +43,12 @@ class Ingestor():
         self.ingest_categories()
 
         for c in tqdm(self.connector.get_node_label('Category'), desc = 'intgesting category playlists'):
-    
             self.ingest_category_playlist(c['id'])
 
         # TODO: ingest tracks
-                # self.ingest_playlist_tracks(p['tracks']['href'])
+        for p in tqdm(self.connector.get_node_label('Playlist'), desc = 'ingesting playlist tracks'):
+            self.ingest_playlist_tracks(p['tracks'])
+
 
     def get_artist_by_name(self, name):
         """Retrives a list of artist obecjts based on searching for the artist
@@ -118,11 +119,13 @@ class Ingestor():
     def ingest_playlist_tracks(self, tracks_href):
         
         tracks = self.spotipy._get(tracks_href)
-        pass
-        #for t in tqdm(tracks['items'], desc = 'Ingesting Tracks'):
+        for t in tqdm(tracks['items'], desc = 'Ingesting Tracks'):
 
-            #TODO: ingest track
-            # TODO: ingest playlist has tracks relation
+            self.connector.insert_track(t['track'])
+
+            #TODO: insert track
+            # TODO: insert playlist has tracks relation
+            #   Add relation attributes
 
     def clear_database(self):
         """Clears the database this ingerstor is connected to."""

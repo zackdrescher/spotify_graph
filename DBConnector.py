@@ -99,21 +99,32 @@ class DBConnector(object):
             except CypherError:
                 print('Playlist %s already stored' % res['name'])
 
-        def insert_track(self, res):
-            feilds = ['collaborative', 'href', 'id', 'name', 'type', 'num_tracks']
-            d3 = {k : v for k,v in res.items() if k in feilds}
-            try:
+    def insert_track(self, res):
+        
+        if res is None:
+            return
 
+        # process feilds
+        artist = res.pop('artists')[0]
+        res['artist'] = artist['name']
+        res['artist_href'] = artist['href']
+        album = res.pop('album')
+        res['album'] = album['name']
+        res['album_href'] = album['href']
+        res.pop('available_markets')
+        res.pop('external_urls')
+        res.pop('external_ids')
+
+        with self.driver.session() as session:
+            try:
                 result = session.run(
-                    statement="CREATE (a:Playlist) SET a = {dict_param}",
-                    parameters={'dict_param': d3}
+                    statement="CREATE (a:Track) SET a = {dict_param}",
+                    parameters={'dict_param': res}
                     )
 
             except CypherError:
                 print('Track %s already stored' % res['name'])
 
-
-                
     # Insert Relations
     ############################################################################
     def insert_related_relation(self, artist1, artist2):

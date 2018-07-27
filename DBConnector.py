@@ -98,9 +98,7 @@ class DBConnector(object):
                     )
             except CypherError:
                 print('Playlist %s already stored' % res['name'])
-
-        pass
-
+                
     # Insert Relations
     ############################################################################
     def insert_related_relation(self, artist1, artist2):
@@ -123,6 +121,15 @@ class DBConnector(object):
                           "WHERE a.id = {artist} AND g.name = {genre} "
                           "CREATE UNIQUE (a)-[:PLAYS]->(g) ",
                 parameters = {'artist' : artist, 'genre' : genre})
+
+    def insert_has_relation(self, category, playlist):
+        with self.driver.session() as session:
+            #try:
+            result = session.run(
+                statement="MATCH (c:Category), (p:Playlist) "
+                          "WHERE c.id = {category} AND p.id = {playlist} "
+                          "CREATE UNIQUE (c)-[:HAS]->(p) ",
+                parameters = {'category' : category, 'playlist' : playlist})
 
     # Remove
     ############################################################################

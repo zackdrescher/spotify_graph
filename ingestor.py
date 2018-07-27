@@ -104,8 +104,7 @@ class Ingestor():
             for p in tqdm(play_lists, desc = 'Insertiing Category playlists'):
 
                 self.connector.insert_playlist(p)
-                # TODO: insert playlist category relation
-                # category id and p['id']
+                self.connector.insert_has_relation(category_id, p['id'])
                 
                 # TODO: ingest tracks
                 # p['tracks']

@@ -9,6 +9,9 @@ from DBConnector import DBConnector
 # Third party
 from tqdm import tqdm
 
+# debug
+from IPython.core.debugger import Pdb
+
 CLIENT_ID = '42f875ddda804fdbbf596da0e0c112d9'
 CLIENT_SECRET = '9df4f102a4a94ababae489826b2f4bcf'
 
@@ -39,6 +42,12 @@ class Ingestor():
 
         self.ingest_categories()
 
+        for c in tqdm(self.connector.get_node_label('Category'), desc = 'intgesting category playlists'):
+    
+            self.ingest_category_playlist(c['id'])
+
+        # TODO: ingest tracks
+                # self.ingest_playlist_tracks(p['tracks']['href'])
 
     def get_artist_by_name(self, name):
         """Retrives a list of artist obecjts based on searching for the artist
@@ -91,7 +100,6 @@ class Ingestor():
         for c in tqdm(categories, desc = 'Inserting categories'):
             
             self.connector.insert_category(c)
-            self.ingest_category_playlist(c['id'])
 
     def ingest_category_playlist(self, category_id):
         # This is a list of playlists
@@ -101,13 +109,20 @@ class Ingestor():
         except SpotifyException as e:
             print('Category %s play list ingestion failed' % category_id)
         else:
-            for p in tqdm(play_lists, desc = 'Insertiing Category playlists'):
+            for p in tqdm(play_lists, desc = 'Insertiing %s playlists' % category_id):
 
                 self.connector.insert_playlist(p)
                 self.connector.insert_has_relation(category_id, p['id'])
-                
-                # TODO: ingest tracks
-                # p['tracks']
+
+    
+    def ingest_playlist_tracks(self, tracks_href):
+        
+        tracks = self.spotipy._get(tracks_href)
+        pass
+        #for t in tqdm(tracks['items'], desc = 'Ingesting Tracks'):
+
+            #TODO: ingest track
+            # TODO: ingest playlist has tracks relation
 
     def clear_database(self):
         """Clears the database this ingerstor is connected to."""

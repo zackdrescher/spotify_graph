@@ -13,13 +13,12 @@ class DBConnector(object):
             auth=basic_auth(db_user, db_password))
 
     # Get data
-    ############################################################################
-    def get_categories(self):
-        """Returns a list of the cagegories in the playlist"""
+    ############################################################################        
+    def get_node_label(self, label):
 
         with self.driver.session() as session:
             return [record['n'] for record in session.run(
-                "MATCH (n:Category) RETURN n")]
+                "MATCH (n:%s) RETURN n" % label)]
 
     # Update data
     ############################################################################
@@ -87,8 +86,9 @@ class DBConnector(object):
         with self.driver.session() as session:
             # create feilds
             res['num_tracks'] = res['tracks']['total']
+            res['tracks'] = res['tracks']['href']
             # Select feilds
-            feilds = ['collaborative', 'href', 'id', 'name', 'type', 'num_tracks']
+            feilds = ['collaborative', 'href', 'id', 'name', 'type', 'tracks', 'num_tracks']
             d3 = {k : v for k,v in res.items() if k in feilds}
             try:
 
@@ -98,6 +98,21 @@ class DBConnector(object):
                     )
             except CypherError:
                 print('Playlist %s already stored' % res['name'])
+
+        def insert_track(self, res):
+            feilds = ['collaborative', 'href', 'id', 'name', 'type', 'num_tracks']
+            d3 = {k : v for k,v in res.items() if k in feilds}
+            try:
+
+                result = session.run(
+                    statement="CREATE (a:Playlist) SET a = {dict_param}",
+                    parameters={'dict_param': d3}
+                    )
+
+            except CypherError:
+                print('Track %s already stored' % res['name'])
+
+
                 
     # Insert Relations
     ############################################################################

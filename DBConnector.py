@@ -148,7 +148,7 @@ class DBConnector(object):
                           "CREATE UNIQUE (a)-[:PLAYS]->(g) ",
                 parameters = {'artist' : artist, 'genre' : genre})
 
-    def insert_has_relation(self, category, playlist):
+    def insert_cat_pl_relation(self, category, playlist):
         with self.driver.session() as session:
             #try:
             result = session.run(
@@ -156,6 +156,15 @@ class DBConnector(object):
                           "WHERE c.id = {category} AND p.id = {playlist} "
                           "CREATE UNIQUE (c)-[:HAS]->(p) ",
                 parameters = {'category' : category, 'playlist' : playlist})
+
+    def insert_pl_tr_relation(self, playlist, track):
+        with self.driver.session() as session:
+            #try:
+            result = session.run(
+                statement="MATCH (p:Playlist), (t:Track) "
+                          "WHERE p.id = {playlist} AND t.id = {track} "
+                          "CREATE UNIQUE (p)-[:HAS]->(t) ",
+                parameters = {'playlist' : playlist, 'track' : track})
 
     # Remove
     ############################################################################

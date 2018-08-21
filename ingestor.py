@@ -40,15 +40,16 @@ class Ingestor():
 
     def ingest(self):
 
+        # ingest categories
         self.ingest_categories()
 
+        # from categories ingest playlists
         for c in tqdm(self.connector.get_node_label('Category'), desc = 'intgesting category playlists'):
             self.ingest_category_playlist(c['id'])
 
-        # TODO: ingest tracks
+        # from playlists ingest tracks
         for p in tqdm(self.connector.get_node_label('Playlist'), desc = 'ingesting playlist tracks'):
             self.ingest_tracklist(p['tracks'], playlist= p['id'])
-
 
     def get_artist_by_name(self, name):
         """Retrives a list of artist obecjts based on searching for the artist

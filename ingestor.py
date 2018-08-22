@@ -38,18 +38,26 @@ class Ingestor():
 
         self.connector = DBConnector()
 
-    def ingest(self):
+    def ingest(self, limit = None):
 
         # ingest categories
         self.ingest_categories()
 
         # from categories ingest playlists
-        for c in tqdm(self.connector.get_node_label('Category'), desc = 'intgesting category playlists'):
+        for c in tqdm(self.connector.get_node_label('Category')[:limit], desc = 'intgesting category playlists'):
             self.ingest_category_playlist(c['id'])
 
         # from playlists ingest tracks
-        for p in tqdm(self.connector.get_node_label('Playlist'), desc = 'ingesting playlist tracks'):
+        for p in tqdm(self.connector.get_node_label('Playlist')[:limit], desc = 'ingesting playlist tracks'):
             self.ingest_tracklist(p['tracks'], playlist= p['id'])
+
+        # ingest artists from tracks
+        # TODO: filter repeated artists
+        #Pdb().set_trace()
+        for t in tqdm(self.connector.get_node_label('Track')[:limit], desc="Ingest track's artists"):
+            self.ingest_artist(t['artist_href'], track=t['id'])
+
+        # TODO: ingest artist genres
 
     def get_artist_by_name(self, name):
         """Retrives a list of artist obecjts based on searching for the artist
@@ -87,7 +95,17 @@ class Ingestor():
         res = self.get_artist_by_name(name)[0]
         self.connector.insert_artist(res)
 
-    def ingest_by_id(self, artist_id):
+    def ingest_artist(self, artist_href, track = None):
+        """Ingest artist by href
+        Track is optional track ID for plays relation"""
+
+        res = self.spotipy._get(artist_href)
+        self.connector.insert_artist(res)
+
+        if track is not None:
+            self.connector.insert_a_t_plays_relation(res['id'], track)
+        
+    def ingest_artist_by_id(self, artist_id):
         """Ingest artist by id"""
 
         res = self.spotipy.artist(artist_id)
@@ -117,15 +135,19 @@ class Ingestor():
                 self.connector.insert_cat_pl_relation(category_id, p['id'])
     
     def ingest_tracklist(self, tracks_href, playlist = None):
+        """Inserts track by href.
+        optional playlist argument is plalist id for HAS relation"""
         
         tracks = self.spotipy._get(tracks_href)
         for t in tqdm(tracks['items'], desc = 'Ingesting Tracks'):
 
             self.connector.insert_track(t['track'])
 
-            if playlist is not None:
+            try:
                 self.connector.insert_pl_tr_relation(playlist, t['track']['id'])
                 # TODO: Add relation attributes
+            except TypeError:
+                pass
 
     def clear_database(self):
         """Clears the database this ingerstor is connected to."""

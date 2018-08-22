@@ -34,7 +34,7 @@ class DBConnector(object):
 
     # insert Nodes
     ############################################################################
-    def insert_artist(self, res):
+    def insert_artist(self, res, genre = False):
         """inserrts API response res as artist into db. Ingests artist generes
         as well."""
 
@@ -50,9 +50,10 @@ class DBConnector(object):
                 print(res['name'] +' already stored')
 
         # ingest artist genres
-        for g in genres:
-            self.insert_genre(g)
-            self.insert_plays_realtion(res['id'], g)
+        if genre:
+            for g in genres:
+                self.insert_genre(g)
+                self.insert_a_g_plays_realtion(res['id'], g)
 
     def insert_category(self, res):
         """inserts API respose res as category in database."""
@@ -137,7 +138,7 @@ class DBConnector(object):
                           "CREATE UNIQUE (a1)-[:RELATED]->(a2) ",
                 parameters = {'artist1' : artist1, 'artist2' : artist2})
 
-    def insert_plays_realtion(self, artist, genre):
+    def insert_a_g_plays_realtion(self, artist, genre):
         """Insert artist plays genre relation into database"""
 
         with self.driver.session() as session:
@@ -147,6 +148,16 @@ class DBConnector(object):
                           "WHERE a.id = {artist} AND g.name = {genre} "
                           "CREATE UNIQUE (a)-[:PLAYS]->(g) ",
                 parameters = {'artist' : artist, 'genre' : genre})
+
+    def insert_a_t_plays_relation(self, artist, track):
+        with self.driver.session() as session:
+            #try:
+            result = session.run(
+                statement="MATCH (a:Artist), (t:Track) "
+                          "WHERE a.id = {artist} AND t.id = {track} "
+                          "CREATE UNIQUE (a)-[:PLAYS]->(t) ",
+                parameters = {'artist' : artist, 'track' : track})
+
 
     def insert_cat_pl_relation(self, category, playlist):
         with self.driver.session() as session:

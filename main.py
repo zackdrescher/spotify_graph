@@ -8,4 +8,4 @@ if __name__ == '__main__':
 
     ing.clear_database()
 
-    ing.ingest()
+    ing.ingest(limit = 20)

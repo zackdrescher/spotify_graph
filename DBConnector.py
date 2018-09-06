@@ -1,4 +1,7 @@
-from neo4j.v1 import GraphDatabase, basic_auth, CypherError
+from neo4j.v1 import GraphDatabase, basic_auth, CypherError, ConstraintError
+
+# debug
+from IPython.core.debugger import Pdb
 
 URL = "bolt://localhost:7687"
 USER = 'neo4j'
@@ -43,10 +46,9 @@ class DBConnector(object):
         with self.driver.session() as session:
             try:
                 result = session.run(
-                    statement="CREATE (a:Artist) SET a = {dict_param}",
-                    parameters={'dict_param': res}
+                    statement="MERGE (a:Artist %s) return a;" % self.merge_param(res)
                     )
-            except CypherError:
+            except ConstraintError:
                 print(res['name'] +' already stored')
 
         # ingest artist genres
@@ -63,10 +65,9 @@ class DBConnector(object):
         with self.driver.session() as session:
             try:
                 result = session.run(
-                    statement="CREATE (a:Category) SET a = {dict_param}",
-                    parameters={'dict_param': res}
+                    statement="MERGE (a:Category %s) return a;" % self.merge_param(res)
                     )
-            except CypherError:
+            except ConstraintError:
                 print(res['name'] +' already stored')
 
     def insert_genre(self, name):
@@ -75,10 +76,9 @@ class DBConnector(object):
         with self.driver.session() as session:
             try:
                 result = session.run(
-                    statement="CREATE (a:Genre) SET a = {dict_param}",
-                    parameters={'dict_param': d}
+                    statement="MERGE (a:Genre 'name' : %s) return a;" % self.merge_param(name)
                     )
-            except CypherError:
+            except ConstraintError:
                 print(d['name'] +' already stored') 
 
     def insert_playlist(self, res):
@@ -94,10 +94,9 @@ class DBConnector(object):
             try:
 
                 result = session.run(
-                    statement="CREATE (a:Playlist) SET a = {dict_param}",
-                    parameters={'dict_param': d3}
+                    statement="MERGE (a:Playlist %s) return a;" % self.merge_param(res)
                     )
-            except CypherError:
+            except ConstraintError:
                 print('Playlist %s already stored' % res['name'])
 
     def insert_track(self, res):
@@ -119,11 +118,10 @@ class DBConnector(object):
         with self.driver.session() as session:
             try:
                 result = session.run(
-                    statement="CREATE (a:Track) SET a = {dict_param}",
-                    parameters={'dict_param': res}
+                    statement="MERGE (a:Track %s) return a;" % self.merge_param(res)
                     )
 
-            except CypherError:
+            except ConstraintError:
                 print('Track %s already stored' % res['name'])
 
     # Insert Relations
@@ -198,6 +196,18 @@ class DBConnector(object):
         obj['followers'] = obj['followers']['total']
         genres = obj.pop('genres')
         return obj, genres
+
+    @staticmethod
+    def merge_param(d):
+        """Converts a dictionary into a string suitable for Cypher Merge 
+        attributes"""
+        s = '{'
+        for k, v in d.items():
+            if type(v) is str:
+                v = repr(v)
+            elif type(v) is not int: continue
+            s += ' %s : %s,' % (k, v)
+        return s[:-1] + '}'
 
 if __name__ == '__main__':
      conn = DBConnector()

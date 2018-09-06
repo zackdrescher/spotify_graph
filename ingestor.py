@@ -44,17 +44,20 @@ class Ingestor():
         self.ingest_categories()
 
         # from categories ingest playlists
-        for c in tqdm(self.connector.get_node_label('Category')[:limit], desc = 'intgesting category playlists'):
+        for c in tqdm(self.connector.get_node_label('Category')[:limit], 
+                desc = 'intgesting category playlists'):
             self.ingest_category_playlist(c['id'])
 
         # from playlists ingest tracks
-        for p in tqdm(self.connector.get_node_label('Playlist')[:limit], desc = 'ingesting playlist tracks'):
+        for p in tqdm(self.connector.get_node_label('Playlist')[:limit], 
+                desc = 'ingesting playlist tracks'):
             self.ingest_tracklist(p['tracks'], playlist= p['id'])
 
         # ingest artists from tracks
         # TODO: filter repeated artists
         #Pdb().set_trace()
-        for t in tqdm(self.connector.get_node_label('Track')[:limit], desc="Ingest track's artists"):
+        for t in tqdm(self.connector.get_node_label('Track')[:limit], 
+                desc="Ingest track's artists"):
             self.ingest_artist(t['artist_href'], track=t['id'])
 
         # TODO: ingest artist genres

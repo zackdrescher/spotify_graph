@@ -23,6 +23,14 @@ class DBConnector(object):
             return [record['n'] for record in session.run(
                 "MATCH (n:%s) RETURN n" % label)]
 
+    def get_distinct_property(self, prop, label): 
+
+        with self.driver.session() as session:
+            i = 'n.%s' % prop
+            return [record for record in session.run(
+                "MATCH (n:%s) RETURN distinct n.id as id, n.%s as %s" % (
+                    label, prop, prop))]
+
     # Update data
     ############################################################################
     def update_artist(self, artist_id, prop, val):
@@ -155,7 +163,6 @@ class DBConnector(object):
                           "WHERE a.id = {artist} AND t.id = {track} "
                           "CREATE UNIQUE (a)-[:PLAYS]->(t) ",
                 parameters = {'artist' : artist, 'track' : track})
-
 
     def insert_cat_pl_relation(self, category, playlist):
         with self.driver.session() as session:

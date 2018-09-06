@@ -54,9 +54,7 @@ class Ingestor():
             self.ingest_tracklist(p['tracks'], playlist= p['id'])
 
         # ingest artists from tracks
-        # TODO: filter repeated artists
-        #Pdb().set_trace()
-        for t in tqdm(self.connector.get_node_label('Track')[:limit], 
+        for t in tqdm(self.connector.get_distinct_property('artist_href', 'Track')[:limit], 
                 desc="Ingest track's artists"):
             self.ingest_artist(t['artist_href'], track=t['id'])
 

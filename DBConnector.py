@@ -54,6 +54,9 @@ class DBConnector(object):
 
         res, genres = self.parse_artist(res)
 
+        # ARA flag
+        res['ARA'] = False
+
         with self.driver.session() as session:
             try:
                 result = session.run(
@@ -213,9 +216,9 @@ class DBConnector(object):
         attributes"""
         s = '{'
         for k, v in d.items():
-            if type(v) is str:
+            if isinstance(v, str):
                 v = repr(v.encode('ascii', 'replace').decode('ascii'))
-            elif type(v) is not int: continue
+            elif not isinstance(v, (int, bool)): continue
             s += ' %s : %s,' % (k, v)
         return s[:-1] + '}'
 

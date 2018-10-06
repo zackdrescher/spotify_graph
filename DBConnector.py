@@ -1,4 +1,5 @@
 from neo4j.v1 import GraphDatabase, basic_auth, CypherError, ConstraintError
+import pandas as pd
 
 # debug
 from IPython.core.debugger import Pdb
@@ -23,13 +24,15 @@ class DBConnector(object):
             return [record['n'] for record in session.run(
                 "MATCH (n:%s) RETURN n" % label)]
 
-    def get_distinct_property(self, prop, label): 
+    def get_artist_track_dataframe(self, prop, label): 
 
         with self.driver.session() as session:
             i = 'n.%s' % prop
-            return [record for record in session.run(
-                "MATCH (n:%s) RETURN distinct n.id as id, n.%s as %s" % (
-                    label, prop, prop))]
+            res = session.run(
+                "MATCH (n:%s) RETURN n.id as id, n.%s as %s" % (
+                    label, prop, prop))
+            return pd.DataFrame(
+                [record.values() for record in res], columns = res.keys())
 
     # Update data
     ############################################################################
@@ -211,7 +214,7 @@ class DBConnector(object):
         s = '{'
         for k, v in d.items():
             if type(v) is str:
-                v = repr(v)
+                v = repr(v.encode('ascii', 'replace').decode('ascii'))
             elif type(v) is not int: continue
             s += ' %s : %s,' % (k, v)
         return s[:-1] + '}'

@@ -54,9 +54,14 @@ class Ingestor():
             self.ingest_tracklist(p['tracks'], playlist= p['id'])
 
         # ingest artists from tracks
-        for t in tqdm(self.connector.get_distinct_property('artist_href', 'Track')[:limit], 
+        artist = self.connector.get_artist_track_dataframe(
+            'artist_href', 'Track').groupby('artist_href')
+
+        for a, t in tqdm(artist,
                 desc="Ingest track's artists"):
-            self.ingest_artist(t['artist_href'], track=t['id'])
+            self.ingest_artist(a, track=t['id'])
+
+        # TODO: ingest ARA
 
         # TODO: ingest artist genres
 
@@ -103,8 +108,13 @@ class Ingestor():
         res = self.spotipy._get(artist_href)
         self.connector.insert_artist(res)
 
-        if track is not None:
+        if isinstance(track, str):
+            # If there is only one value (as a string)
             self.connector.insert_a_t_plays_relation(res['id'], track)
+        elif track is not None:
+            # if there is a group of values (as a list or series most likely)
+            for t in track:
+                self.connector.insert_a_t_plays_relation(res['id'], t)
         
     def ingest_artist_by_id(self, artist_id):
         """Ingest artist by id"""

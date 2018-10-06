@@ -137,7 +137,7 @@ class Ingestor():
 
         try:
             play_lists = self.spotipy.category_playlists(category_id)['playlists']['items']
-        except SpotifyException as e:
+        except SpotifyException:
             print('Category %s play list ingestion failed' % category_id)
         else:
             for p in tqdm(play_lists, desc = 'Insertiing %s playlists' % category_id):

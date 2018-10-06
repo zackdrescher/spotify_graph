@@ -73,7 +73,7 @@ class DBConnector(object):
 
         with self.driver.session() as session:
             try:
-                result = session.run(
+                session.run(
                     statement="MERGE (a:Artist %s) return a;" % self.merge_param(res)
                     )
             except ConstraintError:
@@ -92,7 +92,7 @@ class DBConnector(object):
 
         with self.driver.session() as session:
             try:
-                result = session.run(
+                session.run(
                     statement="MERGE (a:Category %s) return a;" % self.merge_param(res)
                     )
             except ConstraintError:
@@ -103,7 +103,7 @@ class DBConnector(object):
         d = {'name' : name}
         with self.driver.session() as session:
             try:
-                result = session.run(
+                session.run(
                     statement="MERGE (a:Genre 'name' : %s) return a;" % self.merge_param(name)
                     )
             except ConstraintError:
@@ -121,7 +121,7 @@ class DBConnector(object):
             d3 = {k : v for k,v in res.items() if k in feilds}
             try:
 
-                result = session.run(
+                session.run(
                     statement="MERGE (a:Playlist %s) return a;" % self.merge_param(res)
                     )
             except ConstraintError:
@@ -145,7 +145,7 @@ class DBConnector(object):
 
         with self.driver.session() as session:
             try:
-                result = session.run(
+                session.run(
                     statement="MERGE (a:Track %s) return a;" % self.merge_param(res)
                     )
 
@@ -158,7 +158,7 @@ class DBConnector(object):
         """Insersts related relation between given artists. a1 -> a2."""
 
         with self.driver.session() as session:
-            result = session.run(
+            session.run(
                 statement="MATCH (a1:Artist), (a2:Artist) "
                           "WHERE a1.id = {artist1} AND a2.id = {artist2} "
                           "CREATE UNIQUE (a1)-[:RELATED]->(a2) ",
@@ -168,8 +168,7 @@ class DBConnector(object):
         """Insert artist plays genre relation into database"""
 
         with self.driver.session() as session:
-            #try:
-            result = session.run(
+            session.run(
                 statement="MATCH (a:Artist), (g:Genre) "
                           "WHERE a.id = {artist} AND g.name = {genre} "
                           "CREATE UNIQUE (a)-[:PLAYS]->(g) ",
@@ -177,8 +176,7 @@ class DBConnector(object):
 
     def insert_a_t_plays_relation(self, artist, track):
         with self.driver.session() as session:
-            #try:
-            result = session.run(
+            session.run(
                 statement="MATCH (a:Artist), (t:Track) "
                           "WHERE a.id = {artist} AND t.id = {track} "
                           "CREATE UNIQUE (a)-[:PLAYS]->(t) ",
@@ -186,8 +184,7 @@ class DBConnector(object):
 
     def insert_cat_pl_relation(self, category, playlist):
         with self.driver.session() as session:
-            #try:
-            result = session.run(
+            session.run(
                 statement="MATCH (c:Category), (p:Playlist) "
                           "WHERE c.id = {category} AND p.id = {playlist} "
                           "CREATE UNIQUE (c)-[:HAS]->(p) ",
@@ -195,8 +192,7 @@ class DBConnector(object):
 
     def insert_pl_tr_relation(self, playlist, track):
         with self.driver.session() as session:
-            #try:
-            result = session.run(
+            session.run(
                 statement="MATCH (p:Playlist), (t:Track) "
                           "WHERE p.id = {playlist} AND t.id = {track} "
                           "CREATE UNIQUE (p)-[:HAS]->(t) ",

@@ -12,4 +12,4 @@ ing.ingest(limit=5)
 end = datetime.now()
 t = end - start
 print("Ingestion ended at ", end)
-print("Ingestion ended in ", end)
+print("Ingestion ended in ", t)

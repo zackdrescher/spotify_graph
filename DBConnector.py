@@ -18,11 +18,18 @@ class DBConnector(object):
 
     # Get data
     ############################################################################        
-    def get_node_label(self, label):
+    def get_node_label(self, label, node_traits =  None):
+        """Gets all nodes of with label 
+        node_traits is an optional dictionary to match on. e.g. {id : 1}."""
 
+        if node_traits is None:
+            node_traits = ''
+        else:
+            node_traits = ' ' + self.merge_param(node_traits)
+
+        q = "MATCH (n:%s%s) RETURN n" % (label, node_traits)
         with self.driver.session() as session:
-            return [record['n'] for record in session.run(
-                "MATCH (n:%s) RETURN n" % label)]
+            return [record['n'] for record in session.run(q)]
 
     def get_artist_track_dataframe(self, prop, label): 
 

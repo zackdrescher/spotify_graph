@@ -34,7 +34,6 @@ class DBConnector(object):
     def get_artist_track_dataframe(self, prop, label): 
 
         with self.driver.session() as session:
-            i = 'n.%s' % prop
             res = session.run(
                 "MATCH (n:%s) RETURN n.id as id, n.%s as %s" % (
                     label, prop, prop))

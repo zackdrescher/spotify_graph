@@ -7,7 +7,7 @@ start = datetime.now()
 
 ing.clear_database()
 
-ing.ingest(limit=20)
+ing.ingest(limit=5)
 
 end = datetime.now()
 t = end - start

@@ -8,6 +8,8 @@ from DBConnector import DBConnector
 
 # Third party
 from tqdm import tqdm
+import pandas as pd
+import numpy as np
 
 # debug
 from IPython.core.debugger import Pdb
@@ -62,6 +64,7 @@ class Ingestor():
             self.ingest_artist(a, track=t['id'])
 
         # TODO: ingest ARA
+        self.ingest_related_artists()
 
         # TODO: ingest artist genres
 
@@ -73,27 +76,58 @@ class Ingestor():
         return self.spotipy.search(q, limit=10, offset=0, type='artist',
             market=None)['artists']['items']
 
-    def ingest_related_artist(self, artist_id, limit = NUM_REL_ARTISTS,
-            _depth = 0):
-        """Recursively ingest artist related to a specific artist.
-            Artist must already be in DB."""
+    def ingest_related_artists(self, limit = NUM_REL_ARTISTS, iterations = None):
 
-        # TODO: check if artist DNE and insert if so
+        # TODO: outer loop
 
-        self.connector.update_artist(artist_id, 'ingested', 'true')
+        # pull artists
+        artists = self.connector.get_node_label('Artist', {'ARA' : False})
 
-        ara = self.spotipy.artist_related_artists(artist_id)
+        # get their ARA
+        ara = []
+        for a in tqdm(artists, desc = 'Getting related artists'):
 
-        for i, a in enumerate(ara['artists']):
-            if i > limit:
-                break
+            related = pd.DataFrame(
+                pd.Series(
+                    self.spotipy.artist_related_artists(a['id'])['artists']),
+                columns = ['payload'])
+            
+            related['rel_id'] = related['payload'].apply(lambda x: x['id'])
+            related['id']  = a['id']
 
-            self.connector.insert_artist(a)
-            self.connector.insert_related_relation(artist_id, a['id'])
+            ara.append(related)
 
-            if _depth > 0:
-                self.ingest_related_artist(a['id'], _depth - 1)
+        ara = pd.concat(ara, ignore_index= True)
 
+        # TODO: check for and add new artists
+        a_ids = ara['id'].unique()
+        rel_ids = ara['rel_id'].unique()
+
+        # remove artists in the input list
+        insert_ids = np.setdiff1d(rel_ids, a_ids, assume_unique=True)
+
+        # Pull insert IDs that are in DB 
+        db_ids = np.array(self.connector.get_prop_in('id', 'Artist', insert_ids.tolist()))
+        
+        #disjoint those off of insert ids
+        insert_ids = np.setdiff1d(insert_ids, db_ids, assume_unique=True)
+
+        # get the payloads and add the remove duplicates
+        insert = ara.loc[ara['rel_id'].isin(insert_ids), ['rel_id','payload']]
+        insert = insert.drop_duplicates(subset = 'rel_id')['payload']
+
+        # add the new artists
+        for res in tqdm(insert, desc = "Inserting new artists"):
+            self.connector.insert_artist(res)
+
+        # TODO: add the realtions
+        for i, row in tqdm(ara.iterrows(), desc='Inserting relations'):
+            self.connector.insert_related_relation(row['id'], row['rel_id'])
+
+        # Update flag
+        self.connector.update_prop_in(
+            'Artist', 'ARA', True, [a['id'] for a in artists], 'id')
+    
     def ingest_by_name(self, name):
         """Ingests the first artist from the search of on artist by name into
         the database"""

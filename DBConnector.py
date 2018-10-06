@@ -60,6 +60,18 @@ class DBConnector(object):
                 "RETURN n" % (artist_id, prop, val)
                 )]
 
+    def update_prop_in(self, label, prop, value, IN, in_prop,):
+        """Updates prop to value of nodes with the given label and have 
+        in_prop in IN."""
+        
+        with self.driver.session() as session:
+            return [record['n'] for record in session.run(
+                "MATCH (n:%s ) "
+                "WHERE n.%s IN %s"
+                "SET n.%s = %s "
+                "RETURN n" % (label, in_prop, IN, prop, value)
+                )]
+
     # insert Nodes
     ############################################################################
     def insert_artist(self, res, genre = False):

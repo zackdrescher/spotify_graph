@@ -40,6 +40,14 @@ class DBConnector(object):
             return pd.DataFrame(
                 [record.values() for record in res], columns = res.keys())
 
+    def get_prop_in(self, prop, label, IN):
+
+        with self.driver.session() as session:
+            res = session.run(
+                "MATCH (n:%s) WHERE n.%s IN %s RETURN n.%s as %s" % (
+                    label, prop, IN, prop, prop))
+            return [record['id'] for record in res]
+
     # Update data
     ############################################################################
     def update_artist(self, artist_id, prop, val):

@@ -1,4 +1,4 @@
-#! \bin\bash
+#!/bin/bash
 
 git clone https://github.com/zackdrescher/spotify_ingestor.git
 

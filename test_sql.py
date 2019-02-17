@@ -1,11 +1,8 @@
 import pyodbc
 import os
-server = os.environ['HOST'] 
-database = os.environ['DATABASE']
-username = os.environ['USER']
-password = os.environ['PASSWORD']
-driver= '{ODBC Driver 17 for SQL Server}'
-cnxn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password+ ';Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;')
+c_string = os.environ['CONSTRING'] 
+
+cnxn = pyodbc.connect(c_string)
 cursor = cnxn.cursor()
 cursor.execute("SELECT TOP 20 pc.Name as CategoryName, p.name as ProductName FROM [SalesLT].[ProductCategory] pc JOIN [SalesLT].[Product] p ON pc.productcategoryid = p.productcategoryid")
 row = cursor.fetchone()

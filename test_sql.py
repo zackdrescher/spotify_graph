@@ -1,6 +1,7 @@
 import pyodbc
 import os
-c_string = os.environ['CONSTRING'] 
+
+c_string = open("c_string", 'r').read()
 
 cnxn = pyodbc.connect(c_string)
 cursor = cnxn.cursor()

@@ -2,6 +2,6 @@
 __pycache__/
 
 # personal
-secrets.txt
+c_string.txt
 env
 creds.sh

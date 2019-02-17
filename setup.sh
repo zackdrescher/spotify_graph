@@ -1,9 +1,5 @@
 #! \bin\bash
 
-git clone https://github.com/zackdrescher/spotify_ingestor.git
-
-cd spotify_ingestor
-
 # INSTALL ODBC DRIVER
 sudo su 
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -25,3 +21,5 @@ source ~/.bashrc
 # optional: for unixODBC development headers
 sudo apt-get install unixodbc-dev
 
+# INSTALL PIP
+sudo apt-get install python3-pip

@@ -1,6 +1,6 @@
 import pyodbc
 import os
-server = os.environ['HOST'] + '.database.windows.net'
+server = os.environ['HOST'] 
 database = os.environ['DATABASE']
 username = os.environ['USER']
 password = os.environ['PASSWORD']

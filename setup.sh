@@ -1,13 +1,18 @@
-#! /bin/bash
+#! \bin\bash
 
+git clone https://github.com/zackdrescher/spotify_ingestor.git
+
+cd spotify_ingestor
+
+# INSTALL ODBC DRIVER
 sudo su 
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 
 #Download appropriate package for the OS version
 #Choose only ONE of the following, corresponding to your OS version
 
-#Debian 9
-curl https://packages.microsoft.com/config/debian/9/prod.list > /etc/apt/sources.list.d/mssql-release.list
+#Ubuntu 18.04
+curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
 exit
 sudo apt-get update
@@ -19,3 +24,4 @@ echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
 source ~/.bashrc
 # optional: for unixODBC development headers
 sudo apt-get install unixodbc-dev
+

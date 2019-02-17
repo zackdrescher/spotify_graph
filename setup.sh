@@ -19,7 +19,8 @@ echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
 echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
 source ~/.bashrc
 # optional: for unixODBC development headers
-sudo apt-get install unixodbc-dev
+sudo apt-get install unixodbc unixodbc-dev
 
-# INSTALL PIP
+# INSTALL PIP and Dev packages
+sudo apt-get install python3.6-dev
 sudo apt-get install python3-pip
